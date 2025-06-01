@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Text Editor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px 20px;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-group {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .editor-area {
+            min-height: 400px;
+            padding: 30px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .editor-area:focus {
+            background: white;
+            box-shadow: inset 0 0 10px rgba(0, 123, 255, 0.1);
+        }
+
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 10px;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .toolbar-section:last-child {
+            border-right: none;
+        }
+
+        .toolbar-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-section {
+                justify-content: center;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                padding: 10px 0;
+            }
+
+            .toolbar-section:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="editor-container">
+            <!-- Header -->
+            <div class="text-center py-3"
+                style="background: linear-gradient(135deg, #343a40 0%, #212529 100%); color: white;">
+                <h3 class="mb-0"><i class="fas fa-edit"></i> Web Text Editor</h3>
+                <small>Format your text with style</small>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <!-- Text Formatting -->
+                <div class="toolbar-section">
+                    <span class="toolbar-label">Format:</span>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-primary" id="boldBtn" title="Bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary" id="italicBtn" title="Italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary" id="underlineBtn" title="Underline">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Color -->
+                <div class="toolbar-section">
+                    <span class="toolbar-label">Color:</span>
+                    <input type="color" id="colorPicker" class="color-picker" value="#000000" title="Text Color">
+                </div>
+
+                <!-- Alignment -->
+                <div class="toolbar-section">
+                    <span class="toolbar-label">Align:</span>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" id="leftAlign" title="Align Left">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="centerAlign" title="Center">
+                            <i class="fas fa-align-center"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="rightAlign" title="Align Right">
+                            <i class="fas fa-align-right"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="justifyAlign" title="Justify">
+                            <i class="fas fa-align-justify"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Undo/Redo -->
+                <div class="toolbar-section">
+                    <span class="toolbar-label">History:</span>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" id="undoBtn" title="Undo">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="redoBtn" title="Redo">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="editor-area" contenteditable="true" id="editor">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TextEditor {
+            constructor() {
+                this.editor = document.getElementById('editor');
+                this.history = [];
+                this.historyIndex = -1;
+                this.maxHistory = 50;
+
+                this.initializeButtons();
+                this.saveState();
+                this.setupEventListeners();
+            }
+
+            initializeButtons() {
+                // Format buttons
+                this.boldBtn = document.getElementById('boldBtn');
+                this.italicBtn = document.getElementById('italicBtn');
+                this.underlineBtn = document.getElementById('underlineBtn');
+
+                // Color picker
+                this.colorPicker = document.getElementById('colorPicker');
+
+                // Alignment buttons
+                this.leftAlign = document.getElementById('leftAlign');
+                this.centerAlign = document.getElementById('centerAlign');
+                this.rightAlign = document.getElementById('rightAlign');
+                this.justifyAlign = document.getElementById('justifyAlign');
+
+                // History buttons
+                this.undoBtn = document.getElementById('undoBtn');
+                this.redoBtn = document.getElementById('redoBtn');
+            }
+
+            setupEventListeners() {
+                // Format buttons
+                this.boldBtn.addEventListener('click', () => this.execCommand('bold'));
+                this.italicBtn.addEventListener('click', () => this.execCommand('italic'));
+                this.underlineBtn.addEventListener('click', () => this.execCommand('underline'));
+
+                // Color picker
+                this.colorPicker.addEventListener('change', (e) => {
+                    this.execCommand('foreColor', e.target.value);
+                });
+
+                // Alignment buttons
+                this.leftAlign.addEventListener('click', () => this.execCommand('justifyLeft'));
+                this.centerAlign.addEventListener('click', () => this.execCommand('justifyCenter'));
+                this.rightAlign.addEventListener('click', () => this.execCommand('justifyRight'));
+                this.justifyAlign.addEventListener('click', () => this.execCommand('justifyFull'));
+
+                // History buttons
+                this.undoBtn.addEventListener('click', () => this.undo());
+                this.redoBtn.addEventListener('click', () => this.redo());
+
+                // Track changes for history
+                this.editor.addEventListener('input', () => {
+                    setTimeout(() => this.saveState(), 500);
+                });
+
+                // Update button states on selection change
+                document.addEventListener('selectionchange', () => this.updateButtonStates());
+                this.editor.addEventListener('keyup', () => this.updateButtonStates());
+                this.editor.addEventListener('mouseup', () => this.updateButtonStates());
+            }
+
+            execCommand(command, value = null) {
+                document.execCommand(command, false, value);
+                this.updateButtonStates();
+                this.saveState();
+                this.editor.focus();
+            }
+
+            updateButtonStates() {
+                // Update format button states
+                this.boldBtn.classList.toggle('active', document.queryCommandState('bold'));
+                this.italicBtn.classList.toggle('active', document.queryCommandState('italic'));
+                this.underlineBtn.classList.toggle('active', document.queryCommandState('underline'));
+
+                // Update alignment button states
+                this.leftAlign.classList.toggle('active', document.queryCommandState('justifyLeft'));
+                this.centerAlign.classList.toggle('active', document.queryCommandState('justifyCenter'));
+                this.rightAlign.classList.toggle('active', document.queryCommandState('justifyRight'));
+                this.justifyAlign.classList.toggle('active', document.queryCommandState('justifyFull'));
+
+                // Update history button states
+                this.undoBtn.disabled = this.historyIndex <= 0;
+                this.redoBtn.disabled = this.historyIndex >= this.history.length - 1;
+            }
+
+            saveState() {
+                const content = this.editor.innerHTML;
+
+                // Don't save if content hasn't changed
+                if (this.history.length > 0 && this.history[this.historyIndex] === content) {
+                    return;
+                }
+
+                // Remove any future history if we're not at the end
+                if (this.historyIndex < this.history.length - 1) {
+                    this.history = this.history.slice(0, this.historyIndex + 1);
+                }
+
+                this.history.push(content);
+
+                // Limit history size
+                if (this.history.length > this.maxHistory) {
+                    this.history.shift();
+                } else {
+                    this.historyIndex++;
+                }
+
+                this.updateButtonStates();
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.editor.innerHTML = this.history[this.historyIndex];
+                    this.updateButtonStates();
+                }
+            }
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.editor.innerHTML = this.history[this.historyIndex];
+                    this.updateButtonStates();
+                }
+            }
+        }
+
+        // Initialize the editor when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TextEditor();
+        });
+    </script>
+</body>
+
+</html>
